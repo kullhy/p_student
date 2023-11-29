@@ -1,18 +1,15 @@
-import 'package:intl/intl.dart';
 
 class StudentTime {
   String day = "";
   String name = "";
   int stt = 0;
   String time = "";
-  String status = "";
 
   StudentTime({
     required this.day,
     required this.name,
     required this.stt,
     required this.time,
-    this.status = "",
   });
 
   StudentTime.fromJson(Map<String, dynamic> json) {

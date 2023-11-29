@@ -120,11 +120,7 @@ class StudentTable extends StatelessWidget {
                       SizedBox(
                         width: size.width * 0.15,
                         child: Text(
-                          studentTimes[index].status == "no"
-                              ? "Chưa đi học"
-                              : studentTimes[index].status == "onTime"
-                                  ? "Đúng giờ"
-                                  : "Đi muộn",
+                           "Đi muộn",
                           style: AppTextStyle.blackS14Bold,
                         ),
                       ),

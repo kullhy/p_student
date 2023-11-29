@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syncfusion_flutter_xlsio/xlsio.dart';
+import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -12,12 +12,8 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 class StudentTimeViewModel extends ChangeNotifier {
-  List<StudentTime> studentTimes = [];
   List<StudentTime> studentLate = [];
-  List<StudentTime> studentOnTime = [];
-  List<StudentTime> notAttendedStudents = [];
-  List<StudentTime> forgoCard = [];
-
+  bool isLoading = false;
   List<StudentTime> filterStudents = [];
   String todayDate = DateFormat('dd/MM/yyyy').format(DateTime.now());
 
@@ -29,87 +25,29 @@ class StudentTimeViewModel extends ChangeNotifier {
     if (response.statusCode == 200) {
       final Map<String, dynamic>? data = json.decode(response.body);
       if (data != null && data.containsKey(className)) {
-        final Map<String, dynamic> idRfidData =
-            data[className]['id_rfid'] as Map<String, dynamic>;
-        final List<dynamic> idKeyData =
-            data[className]['id_key'] as List<dynamic>;
-        idRfidData.forEach(
-          (key, studentData) {
-            if (studentData != null) {
-              StudentTime student = StudentTime.fromJson(studentData);
-              String studentDateTime = student.getDateTime();
-              if (studentDateTime == todayDate) {
-                if (DateFormat("HH:mm:ss")
-                    .parse(student.time)
-                    .isBefore(DateFormat("HH:mm:ss").parse('08:00:00'))) {
-                  student.status = "onTime";
-                  studentOnTime.add(student);
-                } else {
-                  student.status = "late";
-                  studentLate.add(student);
-                }
-              } else {
-                // Kiểm tra trong id_key
-                bool foundInIdKey = false;
-                for (final keyData in idKeyData) {
-                  if (keyData != null && keyData['STT'] == student.stt) {
-                    StudentTime keyStudent = StudentTime.fromJson(keyData);
-                    String keyStudentDateTime = keyStudent.getDateTime();
-                    if (keyStudentDateTime == todayDate) {
-                      if (DateFormat("HH:mm:ss")
-                          .parse(keyStudent.time)
-                          .isBefore(DateFormat("HH:mm:ss").parse('08:00:00'))) {
-                        keyStudent.status = "onTime";
-                        student = keyStudent;
-                        forgoCard.add(keyStudent);
-                        studentOnTime.add(keyStudent);
-                      } else {
-                        keyStudent.status = "late";
-                        student = keyStudent;
-                        forgoCard.add(keyStudent);
-                        studentLate.add(keyStudent);
-                      }
-                    } else {
-                      student.status = "no";
-                    }
-                    foundInIdKey = true;
-                    break;
-                  }
-                }
-
-                if (!foundInIdKey) {
-                  student.status = "no";
-                }
-              }
-              studentTimes.add(student);
-            }
-          },
-        );
+        final classData = data[className] as Map<String, dynamic>;
+        final studentsData = classData['students'] as Map<String, dynamic>;
+        studentLate = studentsData.entries
+            .map((entry) => StudentTime.fromJson(entry.value))
+            .where((student) =>
+                DateFormat('dd/MM/yyyy').format(DateTime.parse(student.day)) ==
+                todayDate)
+            .toList();
+        log(studentLate.length.toString());
+        isLoading = true;
+        notifyListeners();
       }
     }
-    filterStudents = studentTimes;
-    notifyListeners();
   }
 
-  void filter(String filter) {
-    if (filter == "all") {
-      filterStudents = studentTimes;
-    } else if (filter == "late") {
-      filterStudents = studentLate;
-    } else if (filter == "onTime") {
-      filterStudents = studentOnTime;
-    } else if (filter == "card") {
-      filterStudents = forgoCard;
-    }
-    notifyListeners();
-  }
+  void filter(String filter) {}
 
   Future<void> exportToExcel(String className) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final Workbook workbook = Workbook();
+    final SharedPreferences prefs =
+        await SharedPreferences.getInstance(); // Tạo một đối tượng Excel
+    Excel excel = Excel.createExcel();
     String? path = prefs.getString(className);
-
-    Worksheet sheet;
+    Sheet sheet;
 
     String pathSave = "";
 
@@ -120,11 +58,16 @@ class StudentTimeViewModel extends ChangeNotifier {
       String selectedDirectory =
           await FilePicker.platform.getDirectoryPath() ?? appDocumentsDir.path;
       pathSave = '$selectedDirectory\\$className.xlsx';
-      sheet = workbook.worksheets.addWithName(convertDateFormat(todayDate));
+      // Tạo một sheet mới với tên ngày tháng hiện tại
+      sheet = excel[convertDateFormat(todayDate)];
     } else {
       File file = File(path);
       if (file.existsSync()) {
-        sheet = workbook.worksheets.addWithName(convertDateFormat(todayDate));
+        // Đọc file excel đã có
+        var bytes = file.readAsBytesSync();
+         excel = Excel.decodeBytes(bytes);
+        // Tạo một sheet mới với tên ngày tháng hiện tại
+        sheet = excel[convertDateFormat(todayDate)];
         pathSave = path;
       } else {
         // File không tồn tại
@@ -134,53 +77,35 @@ class StudentTimeViewModel extends ChangeNotifier {
             await FilePicker.platform.getDirectoryPath() ??
                 appDocumentsDir.path;
         pathSave = '$selectedDirectory\\$className.xlsx';
-        sheet = workbook.worksheets.addWithName(convertDateFormat(todayDate));
+        // Tạo một sheet mới với tên ngày tháng hiện tại
+        sheet = excel[convertDateFormat(todayDate)];
       }
     }
-    // Đặt tên cho các cột
-    sheet.getRangeByName('A1').setText('STT');
-    sheet.getRangeByName('B1').setText('Họ và tên');
-    sheet.getRangeByName('C1').setText('Thời gian');
-    sheet.getRangeByName('D1').setText('Ngày');
-    sheet.getRangeByName('E1').setText('Trạng thái');
+// Đặt tên cho các cột
+    sheet.cell(CellIndex.indexByString('A1')).value = 'STT';
+    sheet.cell(CellIndex.indexByString('B1')).value = 'Họ và tên';
+    sheet.cell(CellIndex.indexByString('C1')).value = 'Thời gian';
+    sheet.cell(CellIndex.indexByString('D1')).value = 'Ngày';
+    sheet.cell(CellIndex.indexByString('E1')).value = 'Trạng thái';
 
-    // Đặt giá trị cho từng ô
-    for (var i = 0; i < studentTimes.length; i++) {
-      sheet
-          .getRangeByName('A${i + 2}')
-          .setNumber(studentTimes[i].stt.toDouble());
-      sheet.getRangeByName('B${i + 2}').setText(studentTimes[i].name);
-      sheet.getRangeByName('C${i + 2}').setText(studentTimes[i].time);
-      sheet.getRangeByName('D${i + 2}').setText(studentTimes[i].day);
-      sheet.getRangeByName('E${i + 2}').setText(
-            studentTimes[i].status == "no"
-                ? "Chưa đi học"
-                : studentTimes[i].status == "onTime"
-                    ? "Đúng giờ"
-                    : "Đi muộn",
-          );
+// Đặt giá trị cho từng ô
+    for (var i = 0; i < studentLate.length; i++) {
+      sheet.cell(CellIndex.indexByString('A${i + 2}')).value =
+          studentLate[i].stt.toDouble();
+      sheet.cell(CellIndex.indexByString('B${i + 2}')).value =
+          studentLate[i].name;
+      sheet.cell(CellIndex.indexByString('C${i + 2}')).value =
+          studentLate[i].time;
+      sheet.cell(CellIndex.indexByString('D${i + 2}')).value =
+          studentLate[i].day;
+      sheet.cell(CellIndex.indexByString('E${i + 2}')).value = "Đi muộn";
     }
 
-    final List<int> bytes = workbook.saveAsStream();
-    workbook.dispose();
-
-    if (path == null) {
-      final File file = File(pathSave);
-      await file.writeAsBytes(bytes, flush: true);
-      OpenFile.open(pathSave);
-      prefs.setString(className, pathSave);
-    } else {
-      File file = File(path);
-      if (file.existsSync()) {
-        File(pathSave).writeAsBytes(bytes);
-        OpenFile.open(pathSave);
-      } else {
-        final File file = File(pathSave);
-        await file.writeAsBytes(bytes, flush: true);
-        OpenFile.open(pathSave);
-        prefs.setString(className, pathSave);
-      }
-    }
+// Lưu và mở file excel
+    final File file = File(pathSave);
+    await file.writeAsBytes(excel.encode()!, flush: true);
+    OpenFile.open(pathSave);
+    prefs.setString(className, pathSave);
   }
 
   String convertDateFormat(String inputDate) {

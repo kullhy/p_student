@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:p_student/common/pallete.dart';
 class LoginField extends StatelessWidget {
   final String hintText;
+  final TextEditingController textEditingController;
   const LoginField({
     Key? key,
-    required this.hintText,
+    required this.hintText, required this.textEditingController,
   }) : super(key: key);
 
   @override
@@ -14,6 +15,7 @@ class LoginField extends StatelessWidget {
         maxWidth: 400,
       ),
       child: TextFormField(
+        controller: textEditingController,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.all(27),
           enabledBorder: OutlineInputBorder(

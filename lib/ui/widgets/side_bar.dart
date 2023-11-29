@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:p_student/common/pallete.dart';
+import 'package:p_student/ui/pages/chat_page.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class MenuSideBar extends StatelessWidget {
@@ -78,22 +79,17 @@ class MenuSideBar extends StatelessWidget {
             debugPrint('Home');
           },
         ),
-        const SidebarXItem(
-          icon: Icons.search,
-          label: 'Search',
+         SidebarXItem(
+          icon: Icons.messenger_outline,
+          label: 'Hỏi đáp',
+          onTap: (){
+             Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ChatPage()),
+            );
+          },
         ),
-        const SidebarXItem(
-          icon: Icons.people,
-          label: 'People',
-        ),
-        const SidebarXItem(
-          icon: Icons.favorite,
-          label: 'Favorites',
-        ),
-        const SidebarXItem(
-          iconWidget: FlutterLogo(size: 20),
-          label: 'Flutter',
-        ),
+        
       ],
     );
   }
