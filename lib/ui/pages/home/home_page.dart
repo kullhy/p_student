@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:p_student/ui/widgets/class_item.dart';
-
-import '../../common/app_text_styles.dart';
+import 'package:p_student/common/app_text_styles.dart';
+import 'package:p_student/ui/pages/home/class_item.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

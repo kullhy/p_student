@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:p_student/ui/pages/login_page.dart';
+import 'package:p_student/ui/pages/main/main_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      home: const MainPage(),
     );
   }
   

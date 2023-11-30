@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:p_student/ui/pages/main_page.dart';
+import 'package:p_student/ui/pages/main/main_page.dart';
 
 class LoginViewModel extends ChangeNotifier {
   Future<void> checkLogin(

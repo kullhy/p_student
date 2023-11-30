@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:p_student/common/pallete.dart';
-import 'package:p_student/ui/pages/chat_page.dart';
+import 'package:p_student/ui/pages/chat/chat_page.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class MenuSideBar extends StatelessWidget {

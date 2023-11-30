@@ -1,6 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:p_student/models/message.dart';
-import 'package:p_student/view_model/chat_view_model.dart';
+import 'package:p_student/ui/pages/chat/chat_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ChatWidget extends StatefulWidget {
@@ -17,7 +19,8 @@ final TextEditingController _messageController = TextEditingController();
 
 @override
   void initState() {
-    widget.viewModel.getChatData();
+    log("oke");
+    widget.viewModel.getStreamChatMassage();
     super.initState();
   }
 
@@ -29,15 +32,16 @@ final TextEditingController _messageController = TextEditingController();
         children: [
           Expanded(
             child: Consumer<ChatViewModel>(builder: (context, viewModel, child) {
+              log("oke 2");
                 final messages = viewModel.messages;
-                return ListView.builder(
+               return messages.isNotEmpty?  ListView.builder(
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final mes = messages[index];
                     Message message = Message(content: mes.content, isClient: mes.isClient);
                     return _buildMessageWidget(message);
                   },
-                );
+                ):const Center(child: CircularProgressIndicator(),);
               },
             ),
           ),
@@ -49,15 +53,19 @@ final TextEditingController _messageController = TextEditingController();
                   child: TextField(
                     controller: _messageController,
                     decoration: const InputDecoration(hintText: 'Type your message...'),
+                    onEditingComplete: ()  {
+                     widget.viewModel.sendMessage( _messageController.text);
+                    _messageController.clear();
+                  },
                   ),
                 ),
-                // IconButton(
-                //   icon: const Icon(Icons.send),
-                //   onPressed: () async {
-                //     await chatProvider.sendMessage(GlobalData.instance.uid!, _messageController.text);
-                //     _messageController.clear();
-                //   },
-                // ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: ()  {
+                     widget.viewModel.sendMessage( _messageController.text);
+                    _messageController.clear();
+                  },
+                ),
               ],
             ),
           ),
@@ -69,7 +77,7 @@ final TextEditingController _messageController = TextEditingController();
   Widget _buildMessageWidget(Message message) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 20),
-    alignment: message.isClient ? Alignment.topRight : Alignment.topLeft,
+    alignment: !message.isClient ? Alignment.topRight : Alignment.topLeft,
     child: Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(8),
@@ -77,7 +85,7 @@ final TextEditingController _messageController = TextEditingController();
         maxWidth: MediaQuery.of(context).size.width * 0.7,
       ),
       decoration: BoxDecoration(
-        color: message.isClient ? Colors.blue : Colors.grey,
+        color: !message.isClient ? Colors.blue : Colors.grey,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

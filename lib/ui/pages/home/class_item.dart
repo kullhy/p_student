@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:p_student/common/app_text_styles.dart';
 import 'package:p_student/common/pallete.dart';
-import 'package:p_student/ui/pages/student_time_page.dart';
+import 'package:p_student/ui/pages/student_time/student_time_page.dart';
 
 class ClassItem extends StatelessWidget {
   const ClassItem({

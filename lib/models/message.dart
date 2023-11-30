@@ -1,8 +1,8 @@
 class Message {
-  final String content;
-  final bool isClient;
-
-  Message({required this.content, required this.isClient});
+   String content;
+   bool isClient;
+   int? createTime;
+  Message({required this.content, required this.isClient,this.createTime});
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(

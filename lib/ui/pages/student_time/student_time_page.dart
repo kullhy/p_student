@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:p_student/common/app_text_styles.dart';
-
+import 'package:p_student/ui/pages/student_time/student_time_view_model.dart';
+import 'package:p_student/ui/pages/student_time/widget/student_table.dart';
 import 'package:p_student/ui/widgets/side_bar.dart';
-import 'package:p_student/ui/widgets/student_table.dart';
-import 'package:p_student/view_model/student_time_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:sidebarx/sidebarx.dart';
 
