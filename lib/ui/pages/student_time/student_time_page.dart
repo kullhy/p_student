@@ -136,11 +136,21 @@ class _StudentTimeState extends State<StudentTimeView>
               Expanded(
                 child: Consumer<StudentTimeViewModel>(
                   builder: (context,viewModel,child) {
-                    if(viewModel.studentLate.isEmpty){
+                    if(viewModel.studentLate.isEmpty && viewModel.isLoading){
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
-                    }else{
+                    }else if(viewModel.studentLate.isEmpty && !viewModel.isLoading){
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("Không tìm thấy học sinh đi muộn",style: AppTextStyle.blackS24W700,),
+                          IconButton(onPressed: (){
+                            viewModel.processStudentData(widget.className);
+                          }, icon: const Icon(Icons.replay_outlined)),
+                        ],
+                      );
+                    } else{
                      return  StudentTable(
                       size: size,
                       studentTimes: viewModel.studentLate,
