@@ -11,6 +11,7 @@ import 'package:open_file/open_file.dart';
 import 'package:p_student/models/student_time.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeVM extends ChangeNotifier {
   bool isLoading = false;
@@ -50,6 +51,12 @@ class HomeVM extends ChangeNotifier {
       }
     }
   }
+
+  Future<void> openGGSheet() async {
+  if (!await launchUrl(Uri.parse("https://docs.google.com/spreadsheets/d/1EQ3I9pc8zkdtKRBMEddajqEt9E0rd2N4eH5YzTOAbOo/edit#gid=0"))) {
+    throw Exception('Could not launch ');
+  }
+}
 
   Future<void> exportExcel() async {
    final SharedPreferences prefs =

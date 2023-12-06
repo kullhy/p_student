@@ -51,6 +51,7 @@ dependencies:
   slide_switcher: ^1.1.2
   shared_preferences: ^2.2.2
   desktop_window: ^0.4.0
+  url_launcher: ^6.1.14
   
 
 dev_dependencies:

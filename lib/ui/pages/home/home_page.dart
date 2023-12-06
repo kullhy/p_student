@@ -206,7 +206,7 @@ class _HomeViewState extends State<HomeView> {
                     _viewModel.exportExcel();
                   },
                   child: SizedBox(
-                    width: 100,
+                    width: 200,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -216,7 +216,28 @@ class _HomeViewState extends State<HomeView> {
                           child: Image.asset("assets/icons/export_excel_icon.png"),
                         ),
                         const SizedBox(width: 12),
-                        const Text("Xem tất cả")
+                        const Text("Xem tất cả bằng EXcel")
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                InkWell(
+                  onTap: () {
+                    _viewModel.openGGSheet();
+                  },
+                  child: SizedBox(
+                    width: 200,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: Image.asset("assets/icons/google_sheet.png"),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text("Xem tất cả bằng Google Sheet")
                       ],
                     ),
                   ),
